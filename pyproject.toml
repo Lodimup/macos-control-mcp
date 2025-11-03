@@ -1,0 +1,21 @@
+[project]
+name = "macos-control-mcp"
+version = "0.1.0"
+description = "macOS control MCP server using FastMCP and PyAutoGUI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.2.0",
+    "pyautogui>=0.9.54",
+    "pillow>=10.0.0",
+    "pyobjc-framework-Quartz>=10.0",
+    "pyobjc-framework-Cocoa>=10.0",
+    "opencv-python>=4.12.0.88",
+]
+
+[project.scripts]
+macos-control-mcp = "macos_control_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

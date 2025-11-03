@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "macos-control": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/sb/macos-control-mcp",
+        "run",
+        "macos-control-mcp"
+      ]
+    }
+  }
+}
