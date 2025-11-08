@@ -1,6 +1,8 @@
 # macOS Control MCP Server
 
 A Model Context Protocol (MCP) server for macOS desktop automation using FastMCP and PyAutoGUI.
+This MCP gives full control to your MacOS desktop. It will work with Linux, and windows but these are not tested.
+Needless to day this is very dangerous. Run in a container, VM, etc.
 
 ## Features
 
@@ -54,7 +56,7 @@ A Model Context Protocol (MCP) server for macOS desktop automation using FastMCP
 
    Add Terminal (or your terminal app) to both of these permissions.
 
-### Configure Claude Desktop
+### Configure Claude Desktop For development
 
 Add this to your Claude Desktop configuration file (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
@@ -65,7 +67,7 @@ Add this to your Claude Desktop configuration file (`~/Library/Application Suppo
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/sb/macos-control-mcp",
+        "<path_to_folder>/macos-control-mcp",
         "run",
         "macos-control-mcp"
       ]

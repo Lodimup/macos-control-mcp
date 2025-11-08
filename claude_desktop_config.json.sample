@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/sb/macos-control-mcp",
+        "<path_to_folder>/macos-control-mcp",
         "run",
         "macos-control-mcp"
       ]
