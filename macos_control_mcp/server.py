@@ -4,13 +4,17 @@ import base64
 import io
 import time
 from typing import Optional
+from PIL import ImageGrab
 
 import pyautogui
 from fastmcp import FastMCP
 
+from macos_control_mcp import __version__
+
 # Configure PyAutoGUI safety features
 pyautogui.FAILSAFE = True  # Move mouse to corner to abort
 pyautogui.PAUSE = 0.1  # Short pause between actions
+
 
 # Initialize FastMCP server
 mcp = FastMCP("macos-control")
@@ -275,30 +279,38 @@ def take_screenshot(
     Returns:
         Base64 encoded JPEG image data
     """
-    if region:
-        parts = [int(p.strip()) for p in region.split(',')]
-        if len(parts) != 4:
-            return "Error: Region must be in format 'x,y,width,height'"
-        screenshot = pyautogui.screenshot(region=tuple(parts))
-    else:
-        screenshot = pyautogui.screenshot()
+    try:
 
-    # Convert RGBA to RGB if necessary (JPEG doesn't support transparency)
-    if screenshot.mode == 'RGBA':
-        screenshot = screenshot.convert('RGB')
+        if region:
+            parts = [int(p.strip()) for p in region.split(',')]
+            if len(parts) != 4:
+                return "Error: Region must be in format 'x,y,width,height'"
+            # ImageGrab.grab expects (left, top, right, bottom)
+            bbox = (parts[0], parts[1], parts[0] + parts[2], parts[1] + parts[3])
+            screenshot = ImageGrab.grab(bbox=bbox)
+        else:
+            screenshot = ImageGrab.grab()
 
-    # Resize if scale is not 1.0
-    if scale != 1.0:
-        new_width = int(screenshot.width * scale)
-        new_height = int(screenshot.height * scale)
-        screenshot = screenshot.resize((new_width, new_height))
+        # Convert RGBA to RGB if necessary (JPEG doesn't support transparency)
+        if screenshot.mode == 'RGBA':
+            screenshot = screenshot.convert('RGB')
 
-    # Convert to base64 JPEG with specified quality
-    buffer = io.BytesIO()
-    screenshot.save(buffer, format='JPEG', quality=quality, optimize=True)
-    img_str = base64.b64encode(buffer.getvalue()).decode()
+        # Resize if scale is not 1.0
+        if scale != 1.0:
+            new_width = int(screenshot.width * scale)
+            new_height = int(screenshot.height * scale)
+            from PIL import Image
+            screenshot = screenshot.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
-    return f"data:image/jpeg;base64,{img_str}"
+        # Convert to base64 JPEG with specified quality
+        buffer = io.BytesIO()
+        screenshot.save(buffer, format='JPEG', quality=quality, optimize=True)
+        img_str = base64.b64encode(buffer.getvalue()).decode()
+
+        return f"data:image/jpeg;base64,{img_str}"
+
+    except Exception as e:
+        return f"Error taking screenshot: {str(e)}"
 
 
 @mcp.tool()
@@ -381,6 +393,42 @@ def set_pause(duration: float) -> str:
     """
     pyautogui.PAUSE = duration
     return f"Pause set to {duration} seconds"
+
+
+# ============================================================================
+# VERSION & INFORMATION TOOLS
+# ============================================================================
+
+@mcp.tool()
+def get_version() -> str:
+    """Get version information for the MCP server and its tools.
+
+    Returns:
+        Version information including server version and tool library versions
+    """
+    import sys
+    import fastmcp
+    try:
+        import PIL
+        pillow_version = PIL.__version__
+    except:
+        pillow_version = "unknown"
+
+    try:
+        import cv2
+        opencv_version = cv2.__version__
+    except:
+        opencv_version = "unknown"
+
+    version_info = f"""macOS Control MCP Server
+Version: {__version__}
+Python: {sys.version.split()[0]}
+FastMCP: {fastmcp.__version__}
+PyAutoGUI: {pyautogui.__version__}
+Pillow: {pillow_version}
+OpenCV: {opencv_version}
+"""
+    return version_info.strip()
 
 
 # ============================================================================
