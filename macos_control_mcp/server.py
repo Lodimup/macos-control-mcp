@@ -260,21 +260,14 @@ def get_screen_size() -> str:
 @mcp.tool()
 def take_screenshot(
     region: Optional[str] = None,
-    scale: float = 0.25,
-    quality: int = 25
+    quality: int = 5
 ) -> str:
     """
     Take a screenshot of the entire screen or a specific region.
 
-    IMPORTANT: By default, take_screenshot reduces the resolution by 25% (scale=0.25).
-    This means coordinates from the screenshot must be multiplied by 4 to get actual screen coordinates.
-    For example, if you see something at (100, 200) in the screenshot, the actual screen
-    coordinate is (400, 800).
-
     Args:
         region: Optional region as "x,y,width,height" (e.g., "0,0,800,600")
-        scale: Scale factor for resizing (e.g., 0.5 for 50% size, default: 0.25)
-        quality: JPEG quality from 1-100 (default: 25, higher = better quality but larger size)
+        quality: JPEG quality from 1-100 (default: 5, higher = better quality but larger size)
 
     Returns:
         Base64 encoded JPEG image data
@@ -294,13 +287,6 @@ def take_screenshot(
         # Convert RGBA to RGB if necessary (JPEG doesn't support transparency)
         if screenshot.mode == 'RGBA':
             screenshot = screenshot.convert('RGB')
-
-        # Resize if scale is not 1.0
-        if scale != 1.0:
-            new_width = int(screenshot.width * scale)
-            new_height = int(screenshot.height * scale)
-            from PIL import Image
-            screenshot = screenshot.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
         # Convert to base64 JPEG with specified quality
         buffer = io.BytesIO()
